@@ -48,7 +48,13 @@ module.exports.createUser = async (req, res, next) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await User.create({ email, password: hashedPassword });
 
-    res.status(201).json({ message: "Usuário cadastrado com sucesso!", data: newUser });
+    res.status(201).json({ 
+      message: "Usuário cadastrado com sucesso!", 
+      data: {
+        id: newUser._id,
+       email: newUser.email
+      } 
+    });
   } catch (error) {
     next(error);
   }
@@ -79,7 +85,7 @@ module.exports.login = async (req, res, next) => {
       throw error;
     }
 
-    const token = jwt.sign({ id: user._id, isAdmin: user.isAdmin }, "uY8n3+PqWz5jZxQfVbG2sL1mT4oN7dJcR9KX6A0MZFY=", { expiresIn: '7d' });
+    const token = jwt.sign({ id: user._id, isAdmin: user.isAdmin }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
     return res.status(200).json({ token, isAdmin: user.isAdmin });
 
@@ -90,7 +96,7 @@ module.exports.login = async (req, res, next) => {
 
 module.exports.getUserInfo = async (req, res) => {
   try {
-    const user = await User.findById(req.user.userId).select("email isAdmin");
+    const user = await User.findById(req.user.id).select("email isAdmin");
 
     if (!user) {
       return res.status(404).json({ message: "Usuário não encontrado" });

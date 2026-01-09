@@ -1,33 +1,28 @@
 const jwt = require('jsonwebtoken');
-require("dotenv").config();
+require('dotenv').config();
 
-module.exports = (req, res, next) => {
-
+module.exports.protect = (req, res, next) => {
   const { authorization } = req.headers;
 
   if (!authorization || !authorization.startsWith('Bearer ')) {
-
-    return res
-      .status(401)
-      .send({ message: 'You Are Not Authorized' });
+    return res.status(401).json({ message: 'Not authorized, no token' });
   }
 
-
-  const token = authorization.replace('Bearer ', '');
-
-  let payload;
+  const token = authorization.split(' ')[1];
 
   try {
-    payload = jwt.verify(token, process.env.JWT_SECRET);
-  } catch (e) {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    return res.status(401).json({ message: 'Not authorized, token invalid' });
+  }
+};
 
-    const err = new Error('Not Authorized');
-    err.statusCode = 403;
-
-    return next(err);
+module.exports.isAdmin = (req, res, next) => {
+  if (req.user && req.user.isAdmin) {
+    return next();
   }
 
-  req.user = payload;
-
-  next();
+  return res.status(403).json({ message: 'Admin access only' });
 };

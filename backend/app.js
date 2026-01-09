@@ -4,7 +4,7 @@ const cors = require("cors");
 const app = express();
 const usersRoutes = require('./routes/users');
 const productsRoutes = require('./routes/products');
-const auth = require('./middlewares/auth');
+const ordersRoutes = require('./routes/orders');
 
 app.use(cors());
 app.use(express.json());
@@ -16,17 +16,9 @@ mongoose.connect("mongodb://localhost:27017/papelaria_start")
 
 const { PORT = 3000 } = process.env;
 
-app.use(function (req, res, next) {
-
-  if (req.originalUrl === '/users/signin' || req.originalUrl === '/users/signup') {
-    return next();
-  } else {
-    return auth(req, res, next);
-  }
-});
-
 app.use('/users', usersRoutes);
 app.use('/products', productsRoutes);
+app.use('/orders', ordersRoutes);
 
 app.use((err, req, res, next) => {
    console.log("err:" + err)
