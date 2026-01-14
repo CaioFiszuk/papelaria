@@ -11,7 +11,7 @@ const {
 
 const { protect, isAdmin } = require('../middlewares/auth');
 
-router.post('/', protect, isAdmin, createProduct);
+router.post('/', protect, createProduct);
 router.get('/', protect, isAdmin, getAllProducts);
 router.get('/product', protect, getProductByName);
 router.get('/category', protect, getProductBCategory);

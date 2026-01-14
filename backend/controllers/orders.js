@@ -1,4 +1,4 @@
-const Order = require('../models/Order');
+const Order = require('../models/order');
 const Product = require('../models/product');
 
 
@@ -32,17 +32,18 @@ module.exports.createOrder = async (req, res) => {
       processedItems.push({
         product: product._id,
         name: product.productName,
-        image: product.images[0] || '',
+        image: item.image,
         price: product.price,
         quantity: item.quantity
       });
+
     }
 
     const shippingPrice = itemsPrice > 200 ? 0 : 20;
     const totalPrice = itemsPrice + shippingPrice;
 
     const order = new Order({
-      user: req.user._id,
+      user: req.user.id,
       orderItems: processedItems,
       shippingAddress,
       paymentMethod,
@@ -60,8 +61,57 @@ module.exports.createOrder = async (req, res) => {
     }
 
     res.status(201).json(createdOrder);
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error creating order' });
   }
 };
+
+ module.exports.getAllOrders = async (req, res) => {
+   try {
+     const orders = await Order.find({})
+     .populate('user', 'name email')
+     .sort('-createdAt')
+ 
+     res.json(orders);
+   } catch (error) {
+     res.status(500).json({ message: 'Error fetching orders' });
+   }
+ };
+
+module.exports.getMyOrders = async (req, res) => {
+   try {
+     const orders = await Order.find({ user: req.user.id })
+     .sort('-createdAt');
+
+     res.json(orders);
+   } catch (error) {
+     res.status(500).json({ message: 'Error fetching orders' });
+   }
+ };
+
+module.exports.getOrderById = async (req, res) => {
+   try {
+     const order = await Order.findById(req.params.id)
+       .populate('user', 'name email');
+ 
+     if (!order) {
+       return res.status(404).json({ message: 'Order not found' });
+     }
+ 
+     if (
+       order.user._id.toString() !== req.user.id.toString() &&
+       !req.user.isAdmin
+     ) {
+       return res.status(403).json({ message: 'Not authorized' });
+     }
+ 
+     res.json(order);
+   } catch (error) {
+     res.status(500).json({
+    message: 'Error fetching orders',
+    error: error.message
+  });
+   }
+ }; 
