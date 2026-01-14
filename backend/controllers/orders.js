@@ -115,3 +115,27 @@ module.exports.getOrderById = async (req, res) => {
   });
    }
  }; 
+
+ module.exports.updateOrderStatus = async (req, res) => {
+   try {
+     const { status } = req.body;
+ 
+     const order = await Order.findById(req.params.id);
+ 
+     if (!order) {
+       return res.status(404).json({ message: 'Order not found' });
+     }
+ 
+     order.status = status;
+ 
+     if (status === 'paid') {
+       order.isPaid = true;
+       order.paidAt = Date.now();
+     }
+ 
+     const updatedOrder = await order.save();
+     res.json(updatedOrder);
+   } catch (error) {
+     res.status(500).json({ message: 'Error updating order' });
+   }
+ };
