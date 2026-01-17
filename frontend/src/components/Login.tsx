@@ -3,7 +3,7 @@ function Login() {
 
   return (
     <section>
-
+        Login
     </section>
   )
 }

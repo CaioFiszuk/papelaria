@@ -3,7 +3,7 @@ function Main() {
 
   return (
     <main>
-        
+        Homepage
     </main>
   )
 }
