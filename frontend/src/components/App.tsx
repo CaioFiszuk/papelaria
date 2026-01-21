@@ -16,11 +16,11 @@ function App() {
         <Route 
          path='/'
          element={
-          <ProtectedRoute isLoggedIn={isLoggedIn}>
+          <>
               <Header/>
               <Main/>
               <Footer />
-          </ProtectedRoute>
+          </>
          }
         />
 
